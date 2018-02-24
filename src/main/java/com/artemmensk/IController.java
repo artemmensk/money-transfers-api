@@ -1,5 +1,5 @@
 package com.artemmensk;
 
 public interface IController {
-    void init();
+    void setUpEndpoints();
 }

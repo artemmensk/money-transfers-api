@@ -1,20 +1,26 @@
 package com.artemmensk;
 
+import com.artemmensk.account.IAccountService;
+import com.artemmensk.transfer.ITransferService;
 import com.google.inject.Inject;
 
 import static spark.Spark.get;
 
 public class Controller implements IController {
 
-    private IService service;
+    private ITransferService transferService;
+    private IAccountService accountService;
 
     @Inject
-    public Controller(IService service) {
-        this.service = service;
+    public Controller(ITransferService transferService, IAccountService accountService) {
+        this.transferService = transferService;
+        this.accountService = accountService;
     }
 
     @Override
-    public void init() {
-        get("/transfer/:amount/from/:from/to/:to", (req, res) -> service.transfer(req.params("amount"), req.params("from"), req.params("to")));
+    public void setUpEndpoints() {
+        get("/account/:id", (req, res) -> accountService.findById(Long.valueOf(req.params("id"))));
+        get("/transfer/:amount/from/:from/to/:to",
+                (req, res) -> transferService.transfer(Integer.valueOf(req.params("amount")), Long.valueOf(req.params("from")), Long.valueOf(req.params("to"))));
     }
 }
