@@ -1,18 +1,20 @@
 package com.artemmensk.account;
 
 
+import lombok.Getter;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class AccountRepository implements IAccountRepository {
 
     private Map<Long, Account> accounts = new ConcurrentHashMap<>();
-    private static Long id = 1L;
 
     @Override
     public Account create() {
-        Account account = new Account(id++);
+        final Account account = new Account();
         accounts.put(account.getId(), account);
         return account;
     }

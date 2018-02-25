@@ -27,8 +27,8 @@ public class TransferRepositoryTest {
     private static final Transfer TRANSFER_FROM_2_TO_1 = new Transfer(AMOUNT_2, ACCOUNT_2_ID, ACCOUNT_1_ID);
     private static final Transfer TRANSFER_FROM_2_TO_3 = new Transfer(AMOUNT_3, ACCOUNT_2_ID, ACCOUNT_3_ID);
 
-    private ITransferRepository repository;
-    private Map<String, Transfer> transfers;
+    private final ITransferRepository repository;
+    private final Map<String, Transfer> transfers;
 
     @Inject
     public TransferRepositoryTest(ITransferRepository repository) {
@@ -42,7 +42,7 @@ public class TransferRepositoryTest {
     }
 
     @Test
-    public void create() {
+    public void createTransfer() {
         // when
         final Timestamp now = new Timestamp(new Date().getTime());
         final Transfer transfer = repository.create(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID);

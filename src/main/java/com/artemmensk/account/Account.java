@@ -2,12 +2,14 @@ package com.artemmensk.account;
 
 import lombok.*;
 
-@RequiredArgsConstructor
+import java.util.concurrent.atomic.AtomicLong;
+
 @EqualsAndHashCode(of = "id")
 @Getter
 @Setter
 @ToString
 public class Account {
-    private final Long id;
+    private static final AtomicLong AUTO_INCREMENT = new AtomicLong(1);
+    private final Long id = AUTO_INCREMENT.getAndIncrement();
     private Integer balance = 0;
 }

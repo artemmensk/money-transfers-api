@@ -6,19 +6,26 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import java.util.Map;
+import java.util.Optional;
+
 @Guice(modules = AccountModule.class)
 public class AccountRepositoryTest {
 
-    private IAccountRepository repository;
+    private static final Account ACCOUNT = new Account();
+
+    private final IAccountRepository repository;
+    private final Map<Long, Account> accounts;
 
     @Inject
     public AccountRepositoryTest(IAccountRepository repository) {
         this.repository = repository;
+        accounts = ((AccountRepository)repository).getAccounts();
     }
 
     @BeforeMethod
-    public void setUp() {
-
+    public void beforeEachTest() {
+        accounts.clear();
     }
 
     @Test
@@ -27,18 +34,29 @@ public class AccountRepositoryTest {
         final Account account = repository.create();
 
         // then
-        Assert.assertEquals(account.getId(), new Long(1L));
+        Assert.assertEquals(accounts.size(), 1);
+        Assert.assertEquals(account, accounts.get(account.getId()));
         Assert.assertEquals(account.getBalance(), new Integer(0));
     }
 
     @Test
-    public void findAccount() {
+    public void findAccountById() {
         // given
-        repository.create();
+        accounts.put(ACCOUNT.getId(), ACCOUNT);
 
         // when
+        final Account account = repository.findById(ACCOUNT.getId()).get();
 
         // then
-        System.out.println(repository.findById(2L));
+        Assert.assertEquals(account, ACCOUNT);
+    }
+
+    @Test
+    public void findNonExistingAccountById() {
+        // when
+        final Optional<Account> account = repository.findById(ACCOUNT.getId());
+
+        // then
+        Assert.assertFalse(account.isPresent());
     }
 }
