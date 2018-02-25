@@ -43,7 +43,7 @@ public class TransferService implements ITransferService {
                 }
                 fromAccount.setBalance(fromAccount.getBalance() - amount);
                 toAccount.setBalance(toAccount.getBalance() + amount);
-                return transferRepository.create(fromAccount.getId(), toAccount.getId(), amount);
+                return transferRepository.create(amount, fromAccount.getId(), toAccount.getId());
             }
         }
     }

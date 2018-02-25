@@ -50,7 +50,7 @@ public class ControllerTest {
 
     @Test
     void test() throws AccountNotFound, NotEnoughBalance {
-        when(transferService.transfer(any(), any(), any())).thenReturn(new Transfer(123L, 321L, 500));
+        when(transferService.transfer(any(), any(), any())).thenReturn(new Transfer(500, 123L, 321L));
         given().
                 baseUri(BASE_URI).
         when().
