@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class AccountRepository implements IAccountRepository {
 
-    private Map<Long, Account> accounts = new ConcurrentHashMap<>();
+    private final Map<Long, Account> accounts = new ConcurrentHashMap<>();
 
     @Override
     public Account create() {

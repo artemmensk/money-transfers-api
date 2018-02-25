@@ -8,8 +8,8 @@ import com.google.inject.Inject;
 
 public class TransferService implements ITransferService {
 
-    private IAccountRepository accountRepository;
-    private ITransferRepository transferRepository;
+    private final IAccountRepository accountRepository;
+    private final ITransferRepository transferRepository;
 
     @Inject
     public TransferService(IAccountRepository accountRepository, ITransferRepository transferRepository) {

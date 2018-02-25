@@ -1,8 +1,8 @@
 package com.artemmensk.account;
 
-import java.util.Optional;
+import com.artemmensk.exception.AccountNotFound;
 
 public interface IAccountService {
     Account create();
-    Optional<Account> findById(Long id);
+    Account findById(Long id) throws AccountNotFound;
 }

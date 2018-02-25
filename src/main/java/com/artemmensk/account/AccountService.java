@@ -1,12 +1,11 @@
 package com.artemmensk.account;
 
+import com.artemmensk.exception.AccountNotFound;
 import com.google.inject.Inject;
-
-import java.util.Optional;
 
 public class AccountService implements IAccountService {
 
-    private IAccountRepository accountRepository;
+    private final IAccountRepository accountRepository;
 
     @Inject
     public AccountService(IAccountRepository accountRepository) {
@@ -15,11 +14,11 @@ public class AccountService implements IAccountService {
 
     @Override
     public Account create() {
-        return null;
+        return accountRepository.create();
     }
 
     @Override
-    public Optional<Account> findById(Long id) {
-        return Optional.empty();
+    public Account findById(Long id) throws AccountNotFound {
+        return accountRepository.findById(id).orElseThrow(() -> new AccountNotFound(id));
     }
 }

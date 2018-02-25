@@ -7,10 +7,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import javax.inject.Named;
 import java.sql.Timestamp;
 import java.util.*;
 
-@Guice(modules = {TransferModule.class, AccountModule.class})
+@Guice(modules = {TransferModule.class})
 public class TransferRepositoryTest {
 
     private static final Long ACCOUNT_1_ID = 1L;
@@ -31,9 +32,9 @@ public class TransferRepositoryTest {
     private final Map<String, Transfer> transfers;
 
     @Inject
-    public TransferRepositoryTest(ITransferRepository repository) {
+    public TransferRepositoryTest(ITransferRepository repository, @Named ("transfers") Map<String, Transfer> transfers) {
         this.repository = repository;
-        transfers = ((TransferRepository)repository).getTransfers();
+        this.transfers = transfers;
     }
 
     @BeforeMethod
@@ -58,7 +59,7 @@ public class TransferRepositoryTest {
     public void getExistingTransfer() {
         // given
         final Transfer existingTransfer = new Transfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID);
-        ((TransferRepository)repository).getTransfers().put(existingTransfer.getUuid(), existingTransfer);
+        transfers.put(existingTransfer.getUuid(), existingTransfer);
 
         // when
         final Transfer transfer = repository.getTransfer(existingTransfer.getUuid()).get();

@@ -7,7 +7,7 @@ import com.google.inject.Injector;
 
 public class Application {
     public static void main( String[] args ) {
-        Injector injector = Guice.createInjector(new ApplicationModule(), new AccountModule(), new TransferModule());
+        final Injector injector = Guice.createInjector(new ControllerModule(), new AccountModule(), new TransferModule());
         injector.getInstance(IController.class).setUpEndpoints();
     }
 }

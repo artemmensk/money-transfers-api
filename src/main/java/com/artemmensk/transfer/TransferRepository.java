@@ -1,14 +1,19 @@
 package com.artemmensk.transfer;
 
-import lombok.Getter;
+import com.google.inject.Inject;
 
+import javax.inject.Named;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
 public class TransferRepository implements ITransferRepository {
 
-    private final Map<String, Transfer> transfers = new HashMap<>();
+    private final Map<String, Transfer> transfers;
+
+    @Inject
+    public TransferRepository(@Named("transfers") Map<String, Transfer> transfers) {
+        this.transfers = transfers;
+    }
 
     @Override
     public Transfer create(Integer amount, Long from, Long to) {
