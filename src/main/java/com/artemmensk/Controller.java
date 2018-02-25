@@ -37,8 +37,8 @@ public class Controller implements IController {
         });
         get("/account/:id", (req, res) ->  accountService.findById(Long.valueOf(req.params("id"))), json);
 
-        get("/transfer/:amount/from/:from/to/:to",
-                (req, res) -> transferService.transfer(Integer.valueOf(req.params("amount")), Long.valueOf(req.params("from")), Long.valueOf(req.params("to"))));
+        get("/performTransfer/:amount/from/:from/to/:to",
+                (req, res) -> transferService.performTransfer(Integer.valueOf(req.params("amount")), Long.valueOf(req.params("from")), Long.valueOf(req.params("to"))));
 
         after("/*", (req, res) -> res.type(MediaType.JSON_UTF_8.toString()));
 

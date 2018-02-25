@@ -1,6 +1,5 @@
 package com.artemmensk.transfer;
 
-import com.artemmensk.account.AccountModule;
 import com.google.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -11,7 +10,7 @@ import javax.inject.Named;
 import java.sql.Timestamp;
 import java.util.*;
 
-@Guice(modules = {TransferModule.class})
+@Guice(modules = TransferModule.class)
 public class TransferRepositoryTest {
 
     private static final Long ACCOUNT_1_ID = 1L;

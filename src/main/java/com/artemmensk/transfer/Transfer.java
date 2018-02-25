@@ -17,6 +17,6 @@ public class Transfer {
     private final String uuid = UUID.randomUUID().toString();
     private final Timestamp timestamp = new Timestamp(new Date().getTime());
     private final Integer amount;
-    private final Long from;
-    private final Long to;
+    private final Long source;
+    private final Long destination;
 }

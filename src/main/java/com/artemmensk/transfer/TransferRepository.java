@@ -16,8 +16,8 @@ public class TransferRepository implements ITransferRepository {
     }
 
     @Override
-    public Transfer create(Integer amount, Long from, Long to) {
-        final Transfer transfer = new Transfer(amount, from, to);
+    public Transfer create(Integer amount, Long source, Long destination) {
+        final Transfer transfer = new Transfer(amount, source, destination);
         transfers.put(transfer.getUuid(), transfer);
         return transfer;
     }
@@ -29,7 +29,7 @@ public class TransferRepository implements ITransferRepository {
 
     @Override
     public List<Transfer> getTransfersForAccount(Long id) {
-        return transfers.values().stream().filter(t -> t.getFrom().equals(id) || t.getTo().equals(id)).collect(Collectors.toList());
+        return transfers.values().stream().filter(t -> t.getSource().equals(id) || t.getDestination().equals(id)).collect(Collectors.toList());
     }
 
     @Override

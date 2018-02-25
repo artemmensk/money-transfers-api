@@ -4,7 +4,13 @@ import com.artemmensk.account.Account;
 import com.artemmensk.account.IAccountRepository;
 import com.artemmensk.exception.AccountNotFound;
 import com.artemmensk.exception.NotEnoughBalance;
+import com.artemmensk.exception.TheSameAccount;
+import com.artemmensk.exception.TransferNotFound;
 import com.google.inject.Inject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class TransferService implements ITransferService {
 
@@ -18,33 +24,63 @@ public class TransferService implements ITransferService {
     }
 
     @Override
-    public Transfer transfer(Integer amount, Long fromId, Long toId) throws AccountNotFound, NotEnoughBalance {
+    public Transfer performTransfer(Integer amount, Long sourceId, Long destinationId) throws AccountNotFound, NotEnoughBalance, TheSameAccount {
+        System.out.println(amount + " from " + sourceId + " to " + destinationId);
+        if (sourceId.equals(destinationId)) {
+            throw new TheSameAccount();
+        }
 
-        System.out.println(amount + " from " + fromId + " to " + toId);
-
-        final Account fromAccount = accountRepository.findById(fromId).orElseThrow(() -> new AccountNotFound(fromId));
-        final Account toAccount = accountRepository.findById(toId).orElseThrow(() -> new AccountNotFound(toId));
+        final Account sourceAccount = accountRepository.findById(sourceId).orElseThrow(() -> new AccountNotFound(sourceId));
+        final Account destinationAccount = accountRepository.findById(destinationId).orElseThrow(() -> new AccountNotFound(destinationId));
 
         final Account firstLock;
         final Account secondLock;
 
-        if (fromAccount.getId() > toAccount.getId()) {
-            firstLock = fromAccount;
-            secondLock = toAccount;
+        if (sourceAccount.getId() > destinationAccount.getId()) {
+            firstLock = sourceAccount;
+            secondLock = destinationAccount;
         } else {
-            firstLock = toAccount;
-            secondLock = fromAccount;
+            firstLock = destinationAccount;
+            secondLock = sourceAccount;
         }
 
         synchronized (firstLock) {
             synchronized (secondLock) {
-                if (fromAccount.getBalance() < amount) {
-                    throw new NotEnoughBalance(fromAccount.getId());
+                final Integer balance = sourceAccount.getBalance();
+                if (balance < amount) {
+                    throw new NotEnoughBalance(balance);
                 }
-                fromAccount.setBalance(fromAccount.getBalance() - amount);
-                toAccount.setBalance(toAccount.getBalance() + amount);
-                return transferRepository.create(amount, fromAccount.getId(), toAccount.getId());
+                sourceAccount.setBalance(sourceAccount.getBalance() - amount);
+                destinationAccount.setBalance(destinationAccount.getBalance() + amount);
+                return transferRepository.create(amount, sourceAccount.getId(), destinationAccount.getId());
             }
         }
+    }
+
+    @Override
+    public Transfer getTransfer(String uuid) throws TransferNotFound {
+        return transferRepository.getTransfer(uuid).orElseThrow(() -> new TransferNotFound(uuid));
+    }
+
+    @Override
+    public List<Transfer> getTransfersForAccount(Long id) throws TransferNotFound {
+        final List<Transfer> transfers = transferRepository.getTransfersForAccount(id);
+
+        if (transfers.isEmpty()) {
+            throw new TransferNotFound(id);
+        }
+
+        return transfers;
+    }
+
+    @Override
+    public List<Transfer> getAllTransfers() throws TransferNotFound {
+        final List<Transfer> transfers = transferRepository.getAllTransfers();
+
+        if (transfers.isEmpty()) {
+            throw new TransferNotFound();
+        }
+
+        return transfers;
     }
 }
