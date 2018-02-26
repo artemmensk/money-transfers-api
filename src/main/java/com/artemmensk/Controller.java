@@ -2,15 +2,20 @@ package com.artemmensk;
 
 import com.artemmensk.account.Account;
 import com.artemmensk.account.IAccountService;
-import com.artemmensk.exception.AccountNotFound;
+import com.artemmensk.exception.*;
 import com.artemmensk.exception.Error;
-import com.artemmensk.exception.TransferNotFound;
 import com.artemmensk.transfer.ITransferService;
+import com.artemmensk.transfer.Transfer;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import org.eclipse.jetty.http.*;
 import spark.ResponseTransformer;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static spark.Spark.*;
 
@@ -18,6 +23,10 @@ public class Controller implements IController {
 
     private final ITransferService transferService;
     private final IAccountService accountService;
+
+    private final Gson gson = new Gson();
+    private final ResponseTransformer json = gson::toJson;
+    private final JsonParser jsonParser = new JsonParser();
 
     @Inject
     public Controller(ITransferService transferService, IAccountService accountService) {
@@ -27,8 +36,6 @@ public class Controller implements IController {
 
     @Override
     public void setUpEndpoints() {
-        final Gson gson = new Gson();
-        final ResponseTransformer json = gson::toJson;
 
         post("/account", (req, res) -> {
             final Account account = accountService.create();
@@ -36,33 +43,38 @@ public class Controller implements IController {
             res.header(HttpHeader.LOCATION.asString(), req.url() + "/" + account.getId());
             return "";
         });
-        get("/account/:id", (req, res) ->  accountService.findById(Long.valueOf(req.params("id"))), json);
+        get("/account/:id", (req, res) -> accountService.findById(Long.valueOf(req.params("id"))), json);
+        get("/account/:id/transfer", (req, res) -> transferService.getTransfersForAccount(Long.valueOf(req.params("id"))), json);
 
-        get("/account/:id/transfer", (req, res) ->  transferService.getTransfersForAccount(Long.valueOf(req.params("id"))), json);
-        get("/transfer", (req, res) ->  transferService.getAllTransfers(), json);
-        get("/transfer/:uuid", (req, res) ->  transferService.getTransfer(req.params("uuid")), json);
-
-        get("/performTransfer/:amount/from/:from/to/:to",
-                (req, res) -> transferService.performTransfer(Integer.valueOf(req.params("amount")), Long.valueOf(req.params("from")), Long.valueOf(req.params("to"))));
+        post("/transfer",
+                (req, res) -> {
+                    final JsonObject object = jsonParser.parse(req.body()).getAsJsonObject();
+                    final Transfer transfer = transferService.performTransfer(
+                            object.get("amount").getAsInt(),
+                            object.get("source").getAsLong(),
+                            object.get("destination").getAsLong()
+                    );
+                    res.status(HttpStatus.CREATED_201);
+                    res.header(HttpHeader.LOCATION.asString(), req.url() + "/" + transfer.getUuid());
+                    return "";
+                });
+        get("/transfer/:uuid", (req, res) -> transferService.getTransfer(req.params("uuid")), json);
+        get("/transfer", (req, res) -> transferService.getAllTransfers(), json);
 
         after("/*", (req, res) -> res.type(MediaType.JSON_UTF_8.toString()));
 
-        exception(TransferNotFound.class, (ex, req, res) -> {
-            res.type(MediaType.JSON_UTF_8.toString());
-            res.status(HttpStatus.NOT_FOUND_404);
-            res.body(gson.toJson(new Error(ex)));
-        });
+        mapStatusCode(HttpStatus.CONFLICT_409, NotEnoughBalance.class);
+        mapStatusCode(HttpStatus.NOT_FOUND_404, TransferNotFound.class, AccountNotFound.class);
+        mapStatusCode(HttpStatus.BAD_REQUEST_400, TheSameAccount.class, Exception.class);
+    }
 
-        exception(AccountNotFound.class, (ex, req, res) -> {
-            res.type(MediaType.JSON_UTF_8.toString());
-            res.status(HttpStatus.NOT_FOUND_404);
-            res.body(gson.toJson(new Error(ex)));
-        });
-
-        exception(Exception.class, (ex, req, res) -> {
-            res.type(MediaType.JSON_UTF_8.toString());
-            res.status(HttpStatus.BAD_REQUEST_400);
-            res.body("{}");
-        });
+    private void mapStatusCode(int status, Class<? extends Exception>... exceptions) {
+        for (Class<? extends Exception> exception : exceptions) {
+            exception(exception, (ex, req, res) -> {
+                res.type(MediaType.JSON_UTF_8.toString());
+                res.status(status);
+                res.body(gson.toJson(new Error(ex)));
+            });
+        }
     }
 }

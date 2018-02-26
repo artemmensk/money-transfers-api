@@ -1,6 +1,6 @@
 package com.artemmensk.exception;
 
-public class TransferNotFound extends ATransferException {
+public class TransferNotFound extends Exception {
     public TransferNotFound(String uuid) {
         super(String.format(ErrorMessage.TRANSFER_NOT_FOUND_WITH_UUID.getMessage(), uuid));
     }

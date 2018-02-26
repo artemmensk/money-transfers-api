@@ -2,9 +2,7 @@ package com.artemmensk;
 
 import com.artemmensk.account.Account;
 import com.artemmensk.account.IAccountService;
-import com.artemmensk.exception.AccountNotFound;
-import com.artemmensk.exception.ErrorMessage;
-import com.artemmensk.exception.TransferNotFound;
+import com.artemmensk.exception.*;
 import com.artemmensk.transfer.ITransferService;
 import com.artemmensk.transfer.Transfer;
 import com.google.inject.Guice;
@@ -19,6 +17,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static spark.Spark.*;
@@ -27,6 +26,7 @@ public class ControllerTest {
 
     private static final String ACCOUNT_URI = "http://localhost:4567/account";
     private static final String TRANSFER_URI = "http://localhost:4567/transfer";
+    private static final Integer BALANCE = 9;
     private static final Integer AMOUNT_1 = 10;
     private static final Integer AMOUNT_2 = 300;
     private static final Long ACCOUNT_1_ID = 1L;
@@ -34,6 +34,7 @@ public class ControllerTest {
     private static final Transfer TRANSFER_1 = new Transfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID);
     private static final Transfer TRANSFER_2 = new Transfer(AMOUNT_2, ACCOUNT_2_ID, ACCOUNT_1_ID);
     private static final List<Transfer> TRANSFERS = Arrays.asList(TRANSFER_1, TRANSFER_2);
+    private static final String POST_BODY = "{\"amount\":" + AMOUNT_1 + ", \"source\":" + ACCOUNT_1_ID + ", \"destination\":"+ ACCOUNT_2_ID + "}";
     private static final Account ACCOUNT = new Account();
 
     private final IAccountService accountService;
@@ -87,11 +88,55 @@ public class ControllerTest {
     }
 
     @Test
-    public void badRequest() {
+    public void performTransfer() throws TheSameAccount, NotEnoughBalance, AccountNotFound {
+        // given
+                org.mockito.Mockito.when(transferService.performTransfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID)).thenReturn(TRANSFER_1);
+                given().body(POST_BODY).
         when()
-                .get(ACCOUNT_URI + "/a").
+                .post(TRANSFER_URI)
+
+        .then()
+                .statusCode(HttpStatus.CREATED_201)
+                .header(HttpHeader.LOCATION.name(), TRANSFER_URI + "/" + TRANSFER_1.getUuid());
+    }
+
+    @Test
+    public void notEnoughBalance() throws TheSameAccount, NotEnoughBalance, AccountNotFound {
+        // given
+                org.mockito.Mockito.when(transferService.performTransfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID)).thenThrow(new NotEnoughBalance(BALANCE));
+                given().body(POST_BODY).
+        when()
+                .post(TRANSFER_URI).
+
         then()
-                .statusCode(HttpStatus.BAD_REQUEST_400);
+                .statusCode(HttpStatus.CONFLICT_409)
+                .body("message", equalTo(String.format(ErrorMessage.NOT_ENOUGH_BALANCE.getMessage(), BALANCE)));
+    }
+
+    @Test
+    public void theSameAccount() throws TheSameAccount, NotEnoughBalance, AccountNotFound {
+        // given
+                org.mockito.Mockito.when(transferService.performTransfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID)).thenThrow(new TheSameAccount());
+                given().body(POST_BODY).
+        when()
+                .post(TRANSFER_URI).
+
+        then()
+                .statusCode(HttpStatus.BAD_REQUEST_400)
+                .body("message", equalTo(ErrorMessage.THE_SAME_ACCOUNT.getMessage()));
+    }
+
+    @Test
+    public void accountNotFound() throws TheSameAccount, NotEnoughBalance, AccountNotFound {
+        // given
+                org.mockito.Mockito.when(transferService.performTransfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID)).thenThrow(new AccountNotFound(ACCOUNT_1_ID));
+                given().body(POST_BODY).
+        when()
+                .post(TRANSFER_URI).
+
+        then()
+                .statusCode(HttpStatus.NOT_FOUND_404)
+                .body("message", equalTo(String.format(ErrorMessage.ACCOUNT_NOT_FOUND.getMessage(), ACCOUNT_1_ID)));
     }
 
     @Test
@@ -168,5 +213,13 @@ public class ControllerTest {
         then()
                 .statusCode(HttpStatus.NOT_FOUND_404)
                 .body("message", equalTo(ErrorMessage.TRANSFER_NOT_FOUND.getMessage()));
+    }
+
+    @Test
+    public void badRequest() {
+        when()
+                .get(ACCOUNT_URI + "/a").
+        then()
+                .statusCode(HttpStatus.BAD_REQUEST_400);
     }
 }
