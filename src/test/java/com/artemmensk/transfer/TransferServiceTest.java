@@ -20,7 +20,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Guice(modules = TransferModuleMock.class)
+@Guice(modules = MockedTransferModule.class)
 public class TransferServiceTest {
 
     private static final Integer AMOUNT_1 = 10;

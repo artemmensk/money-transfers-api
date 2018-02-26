@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
  *
  * @author artemmensk@gmail.com
  */
-@Guice(modules = TransferModuleMock.class)
+@Guice(modules = MockedTransferModule.class)
 public class TransferServiceMultithreadingTest {
 
     private static final int THREADS_AMOUNT = 1000;

@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mockito.Mockito.mock;
 
-public class AccountModuleMock extends AbstractModule{
+public class MockedAccountModule extends AbstractModule{
     @Override
     protected void configure() {
         bind(IAccountService.class).to(AccountService.class);

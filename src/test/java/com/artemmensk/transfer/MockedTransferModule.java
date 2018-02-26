@@ -12,7 +12,7 @@ import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 
-public class TransferModuleMock extends AbstractModule {
+public class MockedTransferModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(ITransferService.class).to(TransferService.class).in(Singleton.class);

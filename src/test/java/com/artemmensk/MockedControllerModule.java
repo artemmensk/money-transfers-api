@@ -7,7 +7,7 @@ import com.google.inject.Singleton;
 
 import static org.mockito.Mockito.mock;
 
-public class ControllerModuleMock extends AbstractModule {
+public class MockedControllerModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(IController.class).to(Controller.class).in(Singleton.class);

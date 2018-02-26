@@ -15,10 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransferModule extends AbstractModule {
     @Override
     protected void configure() {
-        bind(IAccountRepository.class).to(AccountRepository.class).in(Singleton.class);
         bind(ITransferService.class).to(TransferService.class).in(Singleton.class);
         bind(ITransferRepository.class).to(TransferRepository.class).in(Singleton.class);
         bind(new TypeLiteral<Map<String, Transfer>>(){}).annotatedWith(Names.named("transfers")).toInstance(new HashMap<>());
-        bind(new TypeLiteral<Map<Long, Account>>(){}).annotatedWith(Names.named("accounts")).toInstance(new ConcurrentHashMap<>());
     }
 }

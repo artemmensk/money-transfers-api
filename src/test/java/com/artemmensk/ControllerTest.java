@@ -42,7 +42,7 @@ public class ControllerTest {
     private final ITransferService transferService;
 
     private ControllerTest() {
-        final Injector injector = Guice.createInjector(new ControllerModuleMock());
+        final Injector injector = Guice.createInjector(new MockedControllerModule());
         this.accountService = injector.getInstance(IAccountService.class);
         this.transferService = injector.getInstance(ITransferService.class);
         injector.getInstance(IController.class).setUpEndpoints();
@@ -86,6 +86,19 @@ public class ControllerTest {
         then()
                 .statusCode(HttpStatus.BAD_REQUEST_400)
                 .body("message", equalTo(ErrorMessage.NEGATIVE_DEPOSIT.getMessage()));
+    }
+
+    @Test
+    public void depositOnNonExistingAccount() throws AccountNotFound, NegativeDeposit {
+        // given
+                org.mockito.Mockito.doThrow(new AccountNotFound(ACCOUNT_1_ID)).when(accountService).deposit(AMOUNT_1, ACCOUNT_1_ID);
+                given().body(PUT_BODY).
+
+        when()
+                .put(ACCOUNT_URI + "/" + ACCOUNT_1_ID).
+        then()
+                .statusCode(HttpStatus.NOT_FOUND_404)
+                .body("message", equalTo(String.format(ErrorMessage.ACCOUNT_NOT_FOUND.getMessage(), ACCOUNT_1_ID)));
     }
 
     @Test

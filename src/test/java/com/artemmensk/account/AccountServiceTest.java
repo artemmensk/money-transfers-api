@@ -13,7 +13,7 @@ import java.util.Optional;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@Guice(modules = AccountModuleMock.class)
+@Guice(modules = MockedAccountModule.class)
 public class AccountServiceTest {
 
     private static final Account ACCOUNT = new Account();
