@@ -4,6 +4,7 @@ import com.artemmensk.account.Account;
 import com.artemmensk.account.IAccountService;
 import com.artemmensk.exception.AccountNotFound;
 import com.artemmensk.exception.Error;
+import com.artemmensk.exception.TransferNotFound;
 import com.artemmensk.transfer.ITransferService;
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
@@ -37,10 +38,20 @@ public class Controller implements IController {
         });
         get("/account/:id", (req, res) ->  accountService.findById(Long.valueOf(req.params("id"))), json);
 
+        get("/account/:id/transfer", (req, res) ->  transferService.getTransfersForAccount(Long.valueOf(req.params("id"))), json);
+        get("/transfer", (req, res) ->  transferService.getAllTransfers(), json);
+        get("/transfer/:uuid", (req, res) ->  transferService.getTransfer(req.params("uuid")), json);
+
         get("/performTransfer/:amount/from/:from/to/:to",
                 (req, res) -> transferService.performTransfer(Integer.valueOf(req.params("amount")), Long.valueOf(req.params("from")), Long.valueOf(req.params("to"))));
 
         after("/*", (req, res) -> res.type(MediaType.JSON_UTF_8.toString()));
+
+        exception(TransferNotFound.class, (ex, req, res) -> {
+            res.type(MediaType.JSON_UTF_8.toString());
+            res.status(HttpStatus.NOT_FOUND_404);
+            res.body(gson.toJson(new Error(ex)));
+        });
 
         exception(AccountNotFound.class, (ex, req, res) -> {
             res.type(MediaType.JSON_UTF_8.toString());
