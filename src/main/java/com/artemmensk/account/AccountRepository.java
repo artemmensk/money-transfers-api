@@ -1,16 +1,20 @@
 package com.artemmensk.account;
 
 
-import lombok.Getter;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
-@Getter
 public class AccountRepository implements IAccountRepository {
 
-    private final Map<Long, Account> accounts = new ConcurrentHashMap<>();
+    private final Map<Long, Account> accounts;
+
+    @Inject
+    public AccountRepository(@Named("accounts") Map<Long, Account> accounts) {
+        this.accounts = accounts;
+    }
 
     @Override
     public Account create() {

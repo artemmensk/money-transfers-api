@@ -6,6 +6,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 
+import javax.inject.Named;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,9 +19,9 @@ public class AccountRepositoryTest {
     private final Map<Long, Account> accounts;
 
     @Inject
-    public AccountRepositoryTest(IAccountRepository repository) {
+    public AccountRepositoryTest(IAccountRepository repository, @Named("accounts") Map<Long, Account> accounts) {
         this.repository = repository;
-        accounts = ((AccountRepository)repository).getAccounts();
+        this.accounts = accounts;
     }
 
     @BeforeMethod

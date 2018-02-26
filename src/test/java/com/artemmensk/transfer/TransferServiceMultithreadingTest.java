@@ -64,7 +64,7 @@ public class TransferServiceMultithreadingTest {
      * 3) Wait until threads done otherwise timeout.
      */
     @Test
-    public void deadLockTest() throws Exception {
+    public void deadLockTest() throws BrokenBarrierException, InterruptedException, ExecutionException {
         // given
         when(accountRepository.findById(ACCOUNT_1.getId())).thenReturn(Optional.ofNullable(ACCOUNT_1));
         when(accountRepository.findById(ACCOUNT_2.getId())).thenReturn(Optional.ofNullable(ACCOUNT_2));
@@ -86,7 +86,7 @@ public class TransferServiceMultithreadingTest {
             try {
                 f.get(5, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
-                throw new Exception("during TransferService.performTransfer() dead lock occurred", e);
+                throw new TestException("during TransferService.performTransfer() dead lock occurred", e);
             }
         }
 
