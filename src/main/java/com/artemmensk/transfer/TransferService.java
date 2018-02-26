@@ -8,9 +8,8 @@ import com.artemmensk.exception.TheSameAccount;
 import com.artemmensk.exception.TransferNotFound;
 import com.google.inject.Inject;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 public class TransferService implements ITransferService {
 
@@ -25,7 +24,6 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer performTransfer(Integer amount, Long sourceId, Long destinationId) throws AccountNotFound, NotEnoughBalance, TheSameAccount {
-        System.out.println(amount + " from " + sourceId + " to " + destinationId);
         if (sourceId.equals(destinationId)) {
             throw new TheSameAccount();
         }

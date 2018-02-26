@@ -194,7 +194,7 @@ public class TransferServiceTest {
         when(accountRepository.findById(account1.getId())).thenReturn(Optional.ofNullable(account1));
 
         // when
-        service.performTransfer(AMOUNT_2, account1.getId(), account1.getId());
+        service.performTransfer(AMOUNT_1, account1.getId(), account1.getId());
 
         // then
         // throws exception
