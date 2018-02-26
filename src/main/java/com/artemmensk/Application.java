@@ -5,6 +5,9 @@ import com.artemmensk.transfer.TransferModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+/**
+ * Application enter point.
+ */
 public class Application {
     public static void main( String[] args ) {
         final Injector injector = Guice.createInjector(new ControllerModule(), new AccountModule(), new TransferModule());

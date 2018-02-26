@@ -11,16 +11,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.inject.Inject;
+import lombok.extern.log4j.Log4j;
 import org.eclipse.jetty.http.*;
 import spark.ResponseTransformer;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static spark.Spark.*;
 
+/**
+ * Spark based RESTful mapping on {@link ITransferService} and {@link IAccountService}
+ */
+@Log4j
 public class Controller implements IController {
-
     private final ITransferService transferService;
     private final IAccountService accountService;
 
@@ -37,10 +38,19 @@ public class Controller implements IController {
     @Override
     public void setUpEndpoints() {
 
+        log.info("Setting up endpoints...");
+
         post("/account", (req, res) -> {
             final Account account = accountService.create();
             res.status(HttpStatus.CREATED_201);
             res.header(HttpHeader.LOCATION.asString(), req.url() + "/" + account.getId());
+            return "";
+        });
+        put("/account/:id", (req, res) -> {
+            final JsonObject object = jsonParser.parse(req.body()).getAsJsonObject();
+            accountService.deposit(object.get("amount").getAsInt(), Long.valueOf(req.params("id")));
+            res.status(HttpStatus.NO_CONTENT_204);
+            res.header(HttpHeader.LOCATION.asString(), req.url());
             return "";
         });
         get("/account/:id", (req, res) -> accountService.findById(Long.valueOf(req.params("id"))), json);
@@ -65,7 +75,9 @@ public class Controller implements IController {
 
         mapStatusCode(HttpStatus.CONFLICT_409, NotEnoughBalance.class);
         mapStatusCode(HttpStatus.NOT_FOUND_404, TransferNotFound.class, AccountNotFound.class);
-        mapStatusCode(HttpStatus.BAD_REQUEST_400, TheSameAccount.class, Exception.class);
+        mapStatusCode(HttpStatus.BAD_REQUEST_400, NegativeDeposit.class, TheSameAccount.class, Exception.class);
+
+        log.info("Endpoints were set up");
     }
 
     private void mapStatusCode(int status, Class<? extends Exception>... exceptions) {

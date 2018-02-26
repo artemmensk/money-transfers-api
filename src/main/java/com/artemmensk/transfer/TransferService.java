@@ -10,7 +10,6 @@ import com.google.inject.Inject;
 
 import java.util.List;
 
-
 public class TransferService implements ITransferService {
 
     private final IAccountRepository accountRepository;
@@ -24,6 +23,7 @@ public class TransferService implements ITransferService {
 
     @Override
     public Transfer performTransfer(Integer amount, Long sourceId, Long destinationId) throws AccountNotFound, NotEnoughBalance, TheSameAccount {
+
         if (sourceId.equals(destinationId)) {
             throw new TheSameAccount();
         }

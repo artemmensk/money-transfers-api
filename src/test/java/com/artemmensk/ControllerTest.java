@@ -35,6 +35,7 @@ public class ControllerTest {
     private static final Transfer TRANSFER_2 = new Transfer(AMOUNT_2, ACCOUNT_2_ID, ACCOUNT_1_ID);
     private static final List<Transfer> TRANSFERS = Arrays.asList(TRANSFER_1, TRANSFER_2);
     private static final String POST_BODY = "{\"amount\":" + AMOUNT_1 + ", \"source\":" + ACCOUNT_1_ID + ", \"destination\":"+ ACCOUNT_2_ID + "}";
+    private static final String PUT_BODY = "{\"amount\":" + AMOUNT_1 + "}";
     private static final Account ACCOUNT = new Account();
 
     private final IAccountService accountService;
@@ -62,6 +63,29 @@ public class ControllerTest {
         then()
                 .statusCode(HttpStatus.CREATED_201)
                 .header(HttpHeader.LOCATION.name(), ACCOUNT_URI + "/" + ACCOUNT.getId());
+    }
+
+    @Test
+    public void deposit() throws TheSameAccount, NotEnoughBalance, AccountNotFound {
+        given()
+                .body(PUT_BODY).
+        when()
+                .put(ACCOUNT_URI + "/" + ACCOUNT_1_ID).
+        then()
+                .statusCode(HttpStatus.NO_CONTENT_204)
+                .header(HttpHeader.LOCATION.name(), ACCOUNT_URI + "/" + ACCOUNT_1_ID);
+    }
+
+    @Test
+    public void depositNegative() throws AccountNotFound, NegativeDeposit {
+        // given
+                org.mockito.Mockito.doThrow(new NegativeDeposit()).when(accountService).deposit(AMOUNT_1, ACCOUNT_1_ID);
+                given().body(PUT_BODY).
+        when()
+                .put(ACCOUNT_URI + "/" + ACCOUNT_1_ID).
+        then()
+                .statusCode(HttpStatus.BAD_REQUEST_400)
+                .body("message", equalTo(ErrorMessage.NEGATIVE_DEPOSIT.getMessage()));
     }
 
     @Test
