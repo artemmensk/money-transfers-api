@@ -34,7 +34,7 @@ public class ControllerTest {
     private static final Transfer TRANSFER_1 = new Transfer(AMOUNT_1, ACCOUNT_1_ID, ACCOUNT_2_ID);
     private static final Transfer TRANSFER_2 = new Transfer(AMOUNT_2, ACCOUNT_2_ID, ACCOUNT_1_ID);
     private static final List<Transfer> TRANSFERS = Arrays.asList(TRANSFER_1, TRANSFER_2);
-    private static final String POST_BODY = "{\"amount\":" + AMOUNT_1 + ", \"source\":" + ACCOUNT_1_ID + ", \"destination\":"+ ACCOUNT_2_ID + "}";
+    private static final String POST_BODY = "{\"amount\":" + AMOUNT_1 + ", \"sourceId\":" + ACCOUNT_1_ID + ", \"destinationId\":"+ ACCOUNT_2_ID + "}";
     private static final String PUT_BODY = "{\"amount\":" + AMOUNT_1 + "}";
     private static final Account ACCOUNT = new Account();
 

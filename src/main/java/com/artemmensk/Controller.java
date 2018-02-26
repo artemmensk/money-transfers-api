@@ -61,8 +61,8 @@ public class Controller implements IController {
                     final JsonObject object = jsonParser.parse(req.body()).getAsJsonObject();
                     final Transfer transfer = transferService.performTransfer(
                             object.get("amount").getAsInt(),
-                            object.get("source").getAsLong(),
-                            object.get("destination").getAsLong()
+                            object.get("sourceId").getAsLong(),
+                            object.get("destinationId").getAsLong()
                     );
                     res.status(HttpStatus.CREATED_201);
                     res.header(HttpHeader.LOCATION.asString(), req.url() + "/" + transfer.getUuid());
